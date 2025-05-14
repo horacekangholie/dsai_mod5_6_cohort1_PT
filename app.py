@@ -4,8 +4,10 @@ from openai import OpenAI
 from markdown2 import Markdown
 import os
 
+gemini_key = os.getenv("GEMINI_KEY")
+
 # Configure Gemini
-genai.configure(api_key=os.getenv("GEMINI_KEY"))
+genai.configure(api_key=gemini_key)
 
 # Configure OpenAI
 client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
