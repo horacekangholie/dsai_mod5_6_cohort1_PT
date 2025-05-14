@@ -5,12 +5,13 @@ from markdown2 import Markdown
 import os
 
 gemini_key = os.getenv("GEMINI_KEY")
+openai_key = os.getenv("OPENAI_KEY")
 
 # Configure Gemini
 genai.configure(api_key=gemini_key)
 
 # Configure OpenAI
-client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
+client = OpenAI(api_key=openai_key)
 
 # Configure Gemini model
 # model = genai.GenerativeModel("gemini-2.0-flash")
