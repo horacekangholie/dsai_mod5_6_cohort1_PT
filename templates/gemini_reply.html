@@ -4,7 +4,7 @@
 </head>
 <body>
     <div class="container">
-        <h6>reply {{r}}</h6>
+        <div class="response-text">{{r|safe}}</div>
         <form action="/" method="post">
             <input type="submit" value="Main">
         </form>
