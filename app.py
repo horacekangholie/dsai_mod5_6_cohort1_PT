@@ -4,6 +4,8 @@ from openai import OpenAI
 from markdown2 import Markdown
 import os
 from dotenv import load_dotenv
+import sqlite3
+import datetime
 
 # Load environement variables from .env into os.environ
 load_dotenv()
@@ -44,6 +46,51 @@ def gemini_reply():
     return(render_template("gemini_reply.html", r=r))
 
 
+# Working with databse
+@app.route("/main",methods=["GET","POST"])
+def main():
+    # Get the user input
+    q = request.form.get("q", "").strip()  # default to "" and strip whitespace
+    t = datetime.datetime.now()
+
+    if q:
+        # Insert record to table - users
+        conn = sqlite3.connect('user.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO users(name, timestamp) VALUES(?, ?)", (q, t))
+        conn.commit()
+        conn.close()
+    else:
+        pass
+   
+    return(render_template("main.html"))
+
+@app.route("/user_log",methods=["GET","POST"])
+def user_log():
+    # Recursively display record from table - users
+    conn = sqlite3.connect("user.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM users")
+
+    r = c.fetchall()
+    
+    c.close()
+    conn.close()
+    return(render_template("user_log.html", usr=r))
+
+
+@app.route("/delete_log",methods=["GET","POST"])
+def delete_log():
+    # Delete records from table - users
+    conn = sqlite3.connect("user.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM users")
+    conn.commit()
+    c.close()
+    conn.close()
+    return(render_template("delete_log.html"))
+
+
 # OpenAI
 @app.route("/openai",methods=["GET","POST"])
 def openai():
@@ -64,5 +111,5 @@ def openai_reply():
 
 
 if __name__ == "__main__":
-    # app.run()
-    app.run(host="0.0.0.0", port=8080, debug=True) # debug=True turns on the reloader
+    app.run()
+    # app.run(host="0.0.0.0", port=8080, debug=True) # debug=True turns on the reloader

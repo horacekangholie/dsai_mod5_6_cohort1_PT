@@ -4,3 +4,4 @@ google-generativeai
 openai
 markdown2
 python-dotenv
+pysqlite3
