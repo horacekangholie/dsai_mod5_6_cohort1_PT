@@ -3,7 +3,12 @@ import google.generativeai as genai
 from openai import OpenAI
 from markdown2 import Markdown
 import os
+from dotenv import load_dotenv
 
+# Load environement variables from .env into os.environ
+load_dotenv()
+
+# Fetch API keys
 gemini_key = os.getenv("GEMINI_KEY")
 openai_key = os.getenv("OPENAI_KEY")
 
@@ -56,6 +61,7 @@ def openai_reply():
     markdowner = Markdown()
     formatted_response = markdowner.convert(r)
     return(render_template("openai_reply.html", r=formatted_response))
+
 
 if __name__ == "__main__":
     app.run()
