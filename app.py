@@ -46,6 +46,12 @@ def gemini_reply():
     return(render_template("gemini_reply.html", r=r))
 
 
+@app.route("/paynow",methods=["GET","POST"])
+def paynow():
+    return(render_template("paynow.html"))
+
+
+
 # Working with databse
 @app.route("/main",methods=["GET","POST"])
 def main():
@@ -90,6 +96,13 @@ def delete_log():
     conn.close()
     return(render_template("delete_log.html"))
 
+@app.route("/logout",methods=["GET","POST"])
+def logout():
+    global first_time
+    first_time = 1
+    return(render_template("index.html"))
+
+
 
 # OpenAI
 @app.route("/openai",methods=["GET","POST"])
@@ -113,3 +126,4 @@ def openai_reply():
 if __name__ == "__main__":
     app.run()
     # app.run(host="0.0.0.0", port=8080, debug=True) # debug=True turns on the reloader
+    

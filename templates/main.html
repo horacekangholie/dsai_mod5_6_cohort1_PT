@@ -11,7 +11,16 @@
         </form>
         <form action="/openai" method="post">
             <input type="submit" value="Chatbot by OpenAI">
-        </form>
+        </form>        
+        <form action="/paynow" method="post">
+            <input type="submit" value="Transfer Money">
+        </form> 
+        <form action="/telegram" method="post">
+            <input type="submit" value="Start Telegram">
+        </form> 
+        <form action="/prediction" method="post">
+            <input type="submit" value="Prediction">
+        </form>         
         <div style="margin-top: 40px;">
             <form action="/user_log" method="post">
                 <input type="submit" value="User Log">
@@ -19,6 +28,11 @@
             <form action="/delete_log" method="post">
                 <input type="submit" value="Delete User Log">
             </form>            
+        </div>
+        <div style="margin-top: 40px;">
+            <form action="/logout" method="post">
+                <input type="submit" value="Logout">
+            </form>
         </div>
     </div>
 </body>
