@@ -6,3 +6,4 @@ markdown2
 python-dotenv
 pysqlite3
 requests
+google-genai

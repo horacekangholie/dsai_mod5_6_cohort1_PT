@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import sqlite3
 import datetime
 import requests
+from google import genai
 
 # Load environement variables from .env into os.environ
 load_dotenv()
@@ -22,9 +23,9 @@ genai.configure(api_key=gemini_key)
 # Configure OpenAI
 client = OpenAI(api_key=openai_key)
 
-gemini_api_key = os.getenv("GEMINI_API_KEY")
-gemini_client = genai.Client(api_key=gemini_api_key)
-gemini_model = "gemini-2.0-flash"
+genmini_api_key = os.getenv("GEMINI_KEY")
+genmini_client = genai.Client(api_key=genmini_api_key)
+genmini_model = "gemini-2.0-flash"
 
 # Configure Gemini model
 # model = genai.GenerativeModel("gemini-2.0-flash")
@@ -116,8 +117,8 @@ def telegram():
             # Process the message and generate a response
             system_prompt = "You are a financial expert.  Answer ONLY questions related to finance, economics, investing, and financial markets. If the question is not related to finance, state that you cannot answer it."
             prompt = f"{system_prompt}\n\nUser Query: {text}"
-            r = gemini_client.models.generate_content(
-                model=gemini_model,
+            r = genmini_client.models.generate_content(
+                model=genmini_model,
                 contents=prompt
             )
             r_text = r.text
