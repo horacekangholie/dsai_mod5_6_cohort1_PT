@@ -5,3 +5,4 @@ openai
 markdown2
 python-dotenv
 pysqlite3
+requests
