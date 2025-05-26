@@ -1,5 +1,5 @@
 from flask import Flask,request,render_template
-import google.generativeai as genai1
+import google.generativeai as genai
 from openai import OpenAI
 from markdown2 import Markdown
 import os
@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import sqlite3
 import datetime
 import requests
-from google import genai
 
 # Load environement variables from .env into os.environ
 load_dotenv()
@@ -18,14 +17,14 @@ openai_key = os.getenv("OPENAI_KEY")
 telegram_gemini_token = os.getenv("GEMINI_TELEGRAM_TOKEN")
 
 # Configure Gemini
-# genai.configure(api_key=gemini_key)
+genai.configure(api_key=gemini_key)
 
 # Configure OpenAI
 client = OpenAI(api_key=openai_key)
 
-genmini_api_key = os.getenv("GEMINI_KEY")
-genmini_client = genai1.Client(api_key=genmini_api_key)
-genmini_model = "gemini-2.0-flash"
+# genmini_api_key = os.getenv("GEMINI_KEY")
+# genmini_client = genai1.Client(api_key=genmini_api_key)
+# genmini_model = "gemini-2.0-flash"
 
 # Configure Gemini model
 # model = genai.GenerativeModel("gemini-2.0-flash")
@@ -81,56 +80,74 @@ def paynow():
 
 
 # Telegram
-@app.route("/start_telegram",methods=["GET","POST"])
+# Telegram: configure webhook
+@app.route("/start_telegram", methods=["GET", "POST"])
 def start_telegram():
+    # Phase 1: show the “Start Telegram” button
+    if request.method == "GET":
+        return render_template("telegram.html")
 
-    domain_url = os.getenv('WEBHOOK_URL')
+    # Phase 2: actually register the webhook
+    domain_url = os.getenv("WEBHOOK_URL")
+    token = telegram_gemini_token
 
-    # The following line is used to delete the existing webhook URL for the Telegram bot
-    delete_webhook_url = f"https://api.telegram.org/bot{gemini_telegram_token}/deleteWebhook"
-    requests.post(delete_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
-    
-    # Set the webhook URL for the Telegram bot
-    set_webhook_url = f"https://api.telegram.org/bot{gemini_telegram_token}/setWebhook?url={domain_url}/telegram"
-    webhook_response = requests.post(set_webhook_url, json={"url": domain_url, "drop_pending_updates": True})
-    print('webhook:', webhook_response)
-    if webhook_response.status_code == 200:
-        # set status message
-        status = "The telegram bot is running. Please check with the telegram bot. @gemini_tt_bot"
+    if not domain_url:
+        status = "🚨 Error: WEBHOOK_URL not set in environment"
+        return render_template("start_telegram.html", status=status)
+
+    # 1) Delete any existing webhook
+    delete_url = f"https://api.telegram.org/bot{token}/deleteWebhook"
+    resp_del = requests.post(delete_url, json={"drop_pending_updates": True})
+
+    # 2) Register your new webhook
+    set_url = f"https://api.telegram.org/bot{token}/setWebhook"
+    resp_set = requests.post(set_url, json={
+        "url": f"{domain_url}/telegram",
+        "drop_pending_updates": True
+    })
+
+    if resp_set.status_code == 200:
+        status = "✅ Telegram bot is running! Send your bot a message now."
     else:
-        status = "Failed to start the telegram bot. Please check the logs."
-    
-    return(render_template("telegram.html", status=status))
+        status = (
+            f"❌ Failed to set webhook: "
+            f"{resp_set.status_code} {resp_set.text}"
+        )
+
+    return render_template("start_telegram.html", status=status)
 
 
-@app.route("/telegram",methods=["GET","POST"])
-def telegram():
-    update = request.get_json()
-    if "message" in update and "text" in update["message"]:
-        # Extract the chat ID and message text from the update
+# Telegram: receive updates
+@app.route("/telegram", methods=["POST"])
+def telegram_webhook():
+    update = request.get_json(force=True)
+
+    # Only proceed if there's a message with text
+    if update.get("message", {}).get("text"):
         chat_id = update["message"]["chat"]["id"]
-        text = update["message"]["text"]
+        text    = update["message"]["text"].strip()
 
         if text == "/start":
-            r_text = "Welcome to the Gemini Telegram Bot! You can ask me any finance-related questions."
+            r_text = "Welcome to the Financial Advisor Bot! Ask me any finance question."
         else:
-            # Process the message and generate a response
-            system_prompt = "You are a financial expert.  Answer ONLY questions related to finance, economics, investing, and financial markets. If the question is not related to finance, state that you cannot answer it."
-            prompt = f"{system_prompt}\n\nUser Query: {text}"
-            r = genmini_client.models.generate_content(
-                model=genmini_model,
-                contents=prompt
+            system_prompt = (
+                "You are a financial expert. Answer ONLY questions related to "
+                "finance, economics, investing, and financial markets. "
+                "If the question is not related, say you can’t answer it."
             )
-            r_text = r.text
-        
-        # Send the response back to the user
-        send_message_url = f"https://api.telegram.org/bot{gemini_telegram_token}/sendMessage"
-        requests.post(send_message_url, data={"chat_id": chat_id, "text": r_text})
-    # Return a 200 OK response to Telegram
-    # This is important to acknowledge the receipt of the message
-    # and prevent Telegram from resending the message
-    # if the server doesn't respond in time
-    return('ok', 200)
+            prompt = f"{system_prompt}\n\nUser Query: {text}"
+            out = model.generate_content(prompt)
+            r_text = out.text
+
+        # Send the response back
+        send_url = f"https://api.telegram.org/bot{telegram_gemini_token}/sendMessage"
+        requests.post(send_url, data={
+            "chat_id": chat_id,
+            "text":    r_text
+        })
+
+    # Telegram requires a 200 OK within a short timeout
+    return "OK", 200
 
 
 # Prediction
