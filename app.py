@@ -1,5 +1,5 @@
 from flask import Flask,request,render_template
-import google.generativeai as genai
+import google.generativeai as genai1
 from openai import OpenAI
 from markdown2 import Markdown
 import os
@@ -18,13 +18,13 @@ openai_key = os.getenv("OPENAI_KEY")
 telegram_gemini_token = os.getenv("GEMINI_TELEGRAM_TOKEN")
 
 # Configure Gemini
-genai.configure(api_key=gemini_key)
+# genai.configure(api_key=gemini_key)
 
 # Configure OpenAI
 client = OpenAI(api_key=openai_key)
 
 genmini_api_key = os.getenv("GEMINI_KEY")
-genmini_client = genai.Client(api_key=genmini_api_key)
+genmini_client = genai1.Client(api_key=genmini_api_key)
 genmini_model = "gemini-2.0-flash"
 
 # Configure Gemini model
