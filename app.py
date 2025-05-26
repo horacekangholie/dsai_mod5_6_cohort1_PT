@@ -14,7 +14,7 @@ load_dotenv()
 # Fetch API keys
 gemini_key = os.getenv("GEMINI_KEY")
 openai_key = os.getenv("OPENAI_KEY")
-telegram_gemini_token = os.getenv("GEMINI_TELEGRAM_TOKEN")
+telegram_token = os.getenv("TELEGRAM_TOKEN")
 
 # Configure Gemini
 genai.configure(api_key=gemini_key)
@@ -89,18 +89,17 @@ def start_telegram():
 
     # Phase 2: actually register the webhook
     domain_url = os.getenv("WEBHOOK_URL")
-    token = telegram_gemini_token
 
     if not domain_url:
         status = "🚨 Error: WEBHOOK_URL not set in environment"
         return render_template("start_telegram.html", status=status)
 
     # 1) Delete any existing webhook
-    delete_url = f"https://api.telegram.org/bot{token}/deleteWebhook"
+    delete_url = f"https://api.telegram.org/bot{telegram_token}/deleteWebhook"
     resp_del = requests.post(delete_url, json={"drop_pending_updates": True})
 
     # 2) Register your new webhook
-    set_url = f"https://api.telegram.org/bot{token}/setWebhook"
+    set_url = f"https://api.telegram.org/bot{telegram_token}/setWebhook"
     resp_set = requests.post(set_url, json={
         "url": f"{domain_url}/telegram",
         "drop_pending_updates": True
@@ -140,7 +139,7 @@ def telegram_webhook():
             r_text = out.text
 
         # Send the response back
-        send_url = f"https://api.telegram.org/bot{telegram_gemini_token}/sendMessage"
+        send_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
         requests.post(send_url, data={
             "chat_id": chat_id,
             "text":    r_text
