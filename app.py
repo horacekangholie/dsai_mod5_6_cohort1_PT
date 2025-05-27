@@ -22,10 +22,6 @@ genai.configure(api_key=gemini_key)
 # Configure OpenAI
 client = OpenAI(api_key=openai_key)
 
-# genmini_api_key = os.getenv("GEMINI_KEY")
-# genmini_client = genai1.Client(api_key=genmini_api_key)
-# genmini_model = "gemini-2.0-flash"
-
 # Configure Gemini model
 # model = genai.GenerativeModel("gemini-2.0-flash")
 model = genai.GenerativeModel("gemini-2.5-flash-preview-04-17")
